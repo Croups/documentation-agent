@@ -18,6 +18,13 @@
 - Contextual Responses: Receive answers that combine information from multiple relevant document sections
 - Interactive Usage: Use through a simple command-line interface with continuous interaction
 
+## Example Usage
+
+Question : How can i make a simple openai call with mirascope
+Answer :
+
+<img width="620" alt="image" src="https://github.com/user-attachments/assets/5adadd26-147f-4cf8-a403-f74fe6abf886">
+
 ## Technologies
 
 - LlamaIndex for document processing
