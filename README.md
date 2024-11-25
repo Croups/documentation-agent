@@ -1,5 +1,6 @@
 # Description
-- This system provides an interactive interface for querying documentation, using advanced natural language processing to understand questions and retrieve relevant information. It processes documents through a sophisticated pipeline that includes sentence splitting, title extraction, and semantic embedding.
+- This system provides an interactive solution for querying documentation, using advanced natural language processing to understand questions and retrieve relevant information. It processes documents through a sophisticated pipeline that includes sentence splitting, title extraction, and semantic embedding.
+
 ## Features
 
 - Document vectorization and semantic search
@@ -7,6 +8,15 @@
 - Relevance scoring and document reranking
 - Support for both general queries and code-specific questions
 - Interactive command-line interface
+  
+# What can you do with this 
+
+- Query Documentation Naturally: Ask questions in plain English about your documentation
+- Get Code Examples: Request specific code snippets and implementation examples
+- Smart Search: Find relevant information even when your query doesn't match exact keywords
+- Process Large Documents: Handle extensive documentation through efficient chunking and embedding
+- Contextual Responses: Receive answers that combine information from multiple relevant document sections
+- Interactive Usage: Use through a simple command-line interface with continuous interaction
 
 ## Technologies
 
@@ -32,3 +42,5 @@
 
 - Python 3.8+
 - OpenAI API key
+
+This is inspired by Mirascope, LLM Development Library. I strongly suggest you to check mirascope's features
