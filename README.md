@@ -9,7 +9,7 @@
 - Support for both general queries and code-specific questions
 - Interactive command-line interface
   
-# What can you do with this 
+## What can you do with this 
 
 - Query Documentation Naturally: Ask questions in plain English about your documentation
 - Get Code Examples: Request specific code snippets and implementation examples
