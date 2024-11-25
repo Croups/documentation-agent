@@ -39,10 +39,6 @@ Answer :
 ## Usage
 
 - Place your documentation in the docs/learn directory
-- Run the script:
-
-- python main.py
-
 - Start querying your documentation
 
 ## Requirements
