@@ -1,6 +1,8 @@
+# Enable nested async loops for Jupyter notebooks
 import nest_asyncio
 nest_asyncio.apply()
 
+# Import required LlamaIndex components for document processing and indexing
 from llama_index.core import (
     SimpleDirectoryReader,
     VectorStoreIndex,
@@ -12,10 +14,12 @@ from llama_index.core.storage import StorageContext
 from llama_index.core.vector_stores import SimpleVectorStore
 from llama_index.embeddings.openai import OpenAIEmbedding
 
+# Load documents from the specified directory
 documents = SimpleDirectoryReader("docs/learn").load_data()
 vector_store = SimpleVectorStore()
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
+# Set up document processing pipeline with sentence splitting and embedding
 pipeline = IngestionPipeline(
     transformations=[
         SentenceSplitter(chunk_size=512, chunk_overlap=128),
@@ -25,35 +29,38 @@ pipeline = IngestionPipeline(
     vector_store=vector_store,
 )
 
+# Process documents through the pipeline and create vector index
 nodes = pipeline.run(documents=documents)
 index = VectorStoreIndex(
     nodes,
     storage_context=storage_context,
 )
 
+# Save the index to disk
 index.storage_context.persist()
 
+# Import components for loading saved index
 from llama_index.core import (
     load_index_from_storage,
 )
 
-
+# Load the saved index and create query engine
 storage_context = StorageContext.from_defaults(persist_dir="storage")
 loaded_index = load_index_from_storage(storage_context)
 query_engine = loaded_index.as_query_engine()
 
-
+# Import Mirascope and Pydantic components for response handling
 from mirascope.core import openai, prompt_template
 from pydantic import BaseModel, Field
 
-
+# Define data model for document relevance scoring
 class Relevance(BaseModel):
     id: int = Field(..., description="The document ID")
     score: int = Field(..., description="The relevance score (1-10)")
     document: str = Field(..., description="The document text")
     reason: str = Field(..., description="A brief explanation for the assigned score")
 
-
+# GPT-4 function for reranking documents based on relevance
 @openai.call(
     "gpt-4o-mini",
     response_model=list[Relevance],
@@ -115,12 +122,13 @@ Begin your assessment now.
 )
 def llm_query_rerank(documents: list[dict], query: str): ...
 
+# Import typing components
 from typing import cast
 
 from llama_index.core import QueryBundle
 from llama_index.core.indices.vector_store import VectorIndexRetriever
 
-
+# Function to retrieve relevant documents based on query
 def get_documents(query: str) -> list[str]:
     """The get_documents tool that retrieves Mirascope documentation based on the
     relevance of the query"""
@@ -133,35 +141,40 @@ def get_documents(query: str) -> list[str]:
     choice_batch_size = 5
     top_n = 2
     results: list[Relevance] = []
+    
+    # Process retrieved nodes in batches
     for idx in range(0, len(retrieved_nodes), choice_batch_size):
         nodes_batch = [
             {
                 "id": idx + id,
-                "text": node.node.get_text(),  # pyright: ignore[reportAttributeAccessIssue]
+                "text": node.node.get_text(),
                 "document_title": node.metadata["document_title"],
                 "semantic_score": node.score,
             }
             for id, node in enumerate(retrieved_nodes[idx : idx + choice_batch_size])
         ]
         results += llm_query_rerank(nodes_batch, query)
+    
+    # Sort and return top results
     results = sorted(results, key=lambda x: x.score or 0, reverse=True)[:top_n]
-
     return [result.document for result in results]
 
+# Import components for response handling
 from typing import Literal
 from pydantic import BaseModel, Field
 from mirascope.core import openai, prompt_template
 
-
+# Define response data model
 class Response(BaseModel):
     classification: Literal["code", "general"] = Field(
         ..., description="The classification of the question"
     )
     content: str = Field(..., description="The response content")
 
-
+# Main documentation agent class
 class DocumentationAgent(BaseModel):
     
+    # GPT-4 function to process and answer questions
     @openai.call("gpt-4o-mini", response_model=Response, json_mode=True)
     @prompt_template(
         """
@@ -206,22 +219,24 @@ class DocumentationAgent(BaseModel):
         """
     )
     def _call(self, question: str) -> openai.OpenAIDynamicConfig:
+        # Get relevant documents and prepare response
         documents = get_documents(question)
         return {"computed_fields": {"context": documents}}
 
     def _step(self, question: str):
+        # Process single question and print response
         answer = self._call(question)
         print("(Assistant):", answer.content)
 
     def run(self):
+        # Main interaction loop
         while True:
             question = input("(User): ")
             if question == "exit":
                 break
             self._step(question)
 
+# Main execution block
 if __name__ == "__main__":
     agent = DocumentationAgent()
     agent.run()
-    
-    
